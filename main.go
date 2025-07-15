@@ -16,13 +16,12 @@ import (
 	"github.com/tarm/serial"
 )
 
-// Event represents an SMS or call event to POST.
 type Event struct {
-	Type      string ` + "`json:\"type\"`" + `
-	Modem     string ` + "`json:\"modem\"`" + `
-	Timestamp string ` + "`json:\"timestamp\"`" + `
-	From      string ` + "`json:\"from\"`" + `
-	Text      string ` + "`json:\"text,omitempty\"`" + `
+	Type      string `json:"type"`
+	Modem     string `json:"modem"`
+	Timestamp string `json:"timestamp"`
+	From      string `json:"from"`
+	Text      string `json:"text,omitempty"`
 }
 
 var (
@@ -134,15 +133,26 @@ func (m *Modem) handleLine(line string) {
 	line = strings.TrimSpace(line)
 	if strings.HasPrefix(line, "+CMT:") {
 		parts := strings.Split(line, ",")
-		from := strings.Trim(parts[1], "\"")
-		if buf, err := m.readNextLine(); err == nil {
-			ev := Event{Type: "sms", Modem: m.Path, From: from, Text: buf, Timestamp: time.Now().Format(time.RFC3339)}
+		from := strings.Trim(parts[1], `"`)
+		if txt, err := m.readNextLine(); err == nil {
+			ev := Event{
+				Type:      "sms",
+				Modem:     m.Path,
+				From:      from,
+				Text:      txt,
+				Timestamp: time.Now().Format(time.RFC3339),
+			}
 			sendEvent(ev)
 		}
 	} else if strings.HasPrefix(line, "+CLIP:") {
 		parts := strings.SplitN(line, ",", 2)
-		num := strings.Trim(parts[0][7:], "\"")
-		ev := Event{Type: "call", Modem: m.Path, From: num, Timestamp: time.Now().Format(time.RFC3339)}
+		num := strings.Trim(parts[0][7:], `"`)
+		ev := Event{
+			Type:      "call",
+			Modem:     m.Path,
+			From:      num,
+			Timestamp: time.Now().Format(time.RFC3339),
+		}
 		sendEvent(ev)
 	}
 }
@@ -160,7 +170,7 @@ func sendEvent(ev Event) {
 	b, _ := json.Marshal(ev)
 	resp, err := http.Post(*endpoint, "application/json", bytes.NewReader(b))
 	if err != nil {
-		log.Println("post err", err)
+		log.Println("post error:", err)
 		return
 	}
 	ioutil.ReadAll(resp.Body)
