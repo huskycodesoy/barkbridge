@@ -15,6 +15,21 @@ You run a service that
 • USB GSM modems supported by Linux serial drivers  
 • An HTTP server ready to receive POSTs  
 
+## Supported Modems
+
+BarkBridge works with USB GSM modems that expose a serial interface.
+The following models have been tested:
+
+- Huawei E3372
+- ZTE MF833
+- Sierra Wireless MC7455
+- Telit LE910
+- Quectel EC25
+
+When purchasing hardware, search online for these model names or terms
+like `USB GSM modem` or `4G LTE USB dongle` to find compatible devices.
+
+
 ## Installation
 
 1. Clone the repo  
